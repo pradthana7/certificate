@@ -2,19 +2,23 @@ import hashlib
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.backends import default_backend
 
 data_list = []
 index = -1
 
 
-def SHA_512(lst):
+def SHA_512(data_list):
     # join str before sha512
-    joinstr = " ".join(data_list)
-    # print("joinstr>>>", joinstr)
+    joinstr = "".join(data_list)
+    print("joinstr>>>", joinstr)
     hashed_string = hashlib.sha512(joinstr.encode('utf-8')).digest()
+    print("hashed_string>>>", hashed_string)
 
     with open("Certificate{}.txt".format(index), "w") as file:
-        file.write(str(data_list))
+        for i in range(4):
+            file.write('{}\n'.format(data_list[i]))
+        file.write(data_list[-1])
 
     data_list.clear()
 
@@ -27,6 +31,7 @@ def Signature(msg):
         private_key = serialization.load_pem_private_key(
             key_file.read(),
             password=b'mypassword',
+            backend=default_backend(),
         )
 
     # signing
