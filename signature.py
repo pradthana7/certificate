@@ -2,6 +2,7 @@ import hashlib
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
+import re
 
 data_list = []
 index = -1
@@ -49,20 +50,35 @@ def Signature(msg):
 while True:
     index += 1
 
-    sname = input("Enter Name: ")
+    sname = input("Please enter Student Name: ")
     data_list.append(sname)
 
-    sid = input("Enter sid: ")
-    data_list.append(sid)
 
-    pname = input("Enter project name: ")
+    while True:
+        sid = input("Please enter a student ID starting with with 'B', 'M', or 'D' followed by a 7-digit number: ")
+        if re.match(r"^[BMD]\d{7}$", sid):
+            data_list.append(sid)
+            break
+        else:
+            print("Invalid input. Please enter a student ID starting with 'B', 'M', or 'D' followed by a 7-digit number.")
+
+    pname = input("Please enter project name: ")
     data_list.append(pname)
 
-    exdate = input("date of experied: ")
+    exdate = input("Date Of Experied (YYYY-MM-DD): ")
     data_list.append(exdate)
 
-    sc = input("score: ")
-    data_list.append(sc)
+
+    while True:
+        try:
+            sc = int(input("Please enter a score between 60 and 100: "))
+            if 60 <= sc <= 100:
+                data_list.append(str(sc))
+                break
+            else:
+                print("Score must be score 60 and 100")
+        except ValueError:
+            print("Invalid score. Please enter a valid score.")
 
     # call func
     msg = SHA_512(data_list)
