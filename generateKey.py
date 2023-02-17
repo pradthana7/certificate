@@ -1,27 +1,36 @@
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
+###############################################REFERRENCE: CHAT GPT###########################################################
 
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization, hashes
 
-gen_new_rsa = rsa.generate_private_key(
+# Generate a private key
+private_key = rsa.generate_private_key(
     public_exponent=65537,
-    key_size=2048,
+    key_size=2048
 )
 
-private_key = gen_new_rsa.private_bytes(
-   encoding=serialization.Encoding.PEM,
-   format=serialization.PrivateFormat.PKCS8,
-   encryption_algorithm=serialization.BestAvailableEncryption(b'mypassword')
+# Get the public key
+public_key = private_key.public_key()
+
+# Serialize the private key
+private_pem = private_key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption()
 )
 
-with open("privatekey.pem", "wb") as file:
-    file.write(private_key)
-
-
-public_key = gen_new_rsa.public_key().public_bytes(
-   encoding=serialization.Encoding.PEM,
-   format=serialization.PublicFormat.SubjectPublicKeyInfo
+# Serialize the public key
+public_pem = public_key.public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
 
-with open("publicKey.pem", "wb") as file:
-    file.write(public_key)
+# Write the private key to a file
+with open('private_key.pem', 'wb') as file:
+    file.write(private_pem)
 
+# Write the public key to a file
+with open('public_key.pem', 'wb') as file:
+    file.write(public_pem)
+
+###############################################REFERRENCE: CHAT GPT###########################################################

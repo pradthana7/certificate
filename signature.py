@@ -1,8 +1,7 @@
 import hashlib
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 data_list = []
 index = -1
@@ -27,12 +26,11 @@ def SHA_512(data_list):
 
 def Signature(msg):
     # Load private key previouly generated
-    with open("privatekey.pem", "rb") as key_file:
-        private_key = serialization.load_pem_private_key(
-            key_file.read(),
-            password=b'mypassword',
-            backend=default_backend(),
-        )
+       
+    with open('private_key.pem', 'rb') as file:
+        private_pem = file.read()
+        private_key = load_pem_private_key(private_pem, password=None)
+        print("private_key",private_key)
 
     # signing
     signature = private_key.sign(
@@ -44,8 +42,8 @@ def Signature(msg):
         hashes.SHA512()
     )
 
-    with open("Signature{}.txt".format(index), "w") as file:
-        file.write(str(signature))
+    with open("Signature{}.txt".format(index), "wb") as file:
+        file.write(signature)
 
 
 while True:
