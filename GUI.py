@@ -1,10 +1,12 @@
+#code ref--> 1. https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/#key-loading
+#code ref--> 2. Chat GPT
+
 from tkinter import *
 from tkinter import ttk, messagebox
-import os
 import csv
 
+
 import hashlib
-import re
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key
@@ -13,15 +15,15 @@ from datetime import date
 
 GUI = Tk()
 GUI.title("MyCertificate-B6322113")
-GUI.geometry("1000x700")
+GUI.geometry("700x700")
 
 FONT30 = ("Angsana New", 30)
 FONT20 = ("Angsana New", 20)
 
 data_list = []
-index = -1
-directory = "./"
-count = 0
+index = 0
+
+
 ############################config tab#########################
 Tab =ttk.Notebook(GUI)
 Tab.pack(fill=BOTH,expand=1)
@@ -29,15 +31,21 @@ Tab.pack(fill=BOTH,expand=1)
 T1 = Frame(Tab)
 T2 = Frame(Tab)
 
+
 icon_tab1 = PhotoImage(file="tab1.png")
 icon_tab2 = PhotoImage(file="tab2.png")
 
+
 Tab.add(T1,text="signature",image=icon_tab1,compound="left")
-Tab.add(T2,text="verify",image=icon_tab2,compound="left")
+Tab.add(T2,text="vertify",image=icon_tab2,compound="left")
+
+
+
 
 ####################signature func###########################
 
 def Append(event=None):
+
     global index
     index += 1
 
@@ -56,11 +64,6 @@ def Append(event=None):
     sc = v_sc.get()
     data_list.append(sc)
     
-    data = [sid,sname,pname]
-    with open("data.csv","a",newline="",encoding="utf-8") as file:
-        fw = csv.writer(file)
-        fw.writerow(data)
-
     SHA_512(data_list)
 
 
@@ -117,7 +120,7 @@ def Signature(msg):
     ###############fix cursor at E1################
     E1.focus()
 
-##############################Tab1################################
+##############################Tab1 signature################################
 
 L = Label(T1,text="Certificate Issuance Program", font=FONT30)
 L.pack(pady=20)
@@ -159,26 +162,11 @@ B1.pack(pady=30, ipadx=20, ipady=10)
 v_result = StringVar()
 result = ttk.Label(T1,textvariable=v_result, foreground="green")
 
+  
+##################################### tab2 verify #############################################
 
-##############################Tab2################################
-
-header = ["index", "studentID","project",]
-hwidth = [100,200,400]
-
-table = ttk.Treeview(T2, columns=header,show="headings", height=20)
-table.pack()
-
-style = ttk.Style()
-style.configure("Treeview.Heading", font=FONT20)
-style.configure("Treeview",font=FONT20,rowheight=30)
-
-for h,w in zip(header,hwidth):
-    table.column(h,width=w)
-    table.heading(h,text=h)
-
-
-##########################verify###################################
-def Verification(ver_index):
+def Verification():
+    ver_index = _ver_index.get()
     with open('public_key.pem', 'rb') as file:
         public_pem = file.read()
         public_key = load_pem_public_key(public_pem)
@@ -197,41 +185,57 @@ def Verification(ver_index):
     # print("today", date.today())
 
     if date_of_expired <= today:
-        print("expired")
-        exit()
+        text = "your certificate has been expired"
+        messagebox.showerror("expired", text)
+        
     else:
-        print("date of expired:", date_of_expired)
 
-    try:
-        # hash certificate in order to get Digest 1
-        joinstr = "".join(list_certificate)
-        digest1 = hashlib.sha512(joinstr.encode('utf-8')).digest()
+        try:
+            # hash certificate in order to get Digest 1
+            joinstr = "".join(list_certificate)
+            digest1 = hashlib.sha512(joinstr.encode('utf-8')).digest()
 
-        print("hashed_string>>>", digest1)
-        print("joinstr>>>", joinstr)
-        print("digest1>>>", digest1)
+            print("hashed_string>>>", digest1)
+            print("joinstr>>>", joinstr)
+            print("digest1>>>", digest1)
 
-        public_key.verify(
-            signature,
-            digest1,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA512()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA512()
-        )
-        print("your signature is valid")
+            public_key.verify(
+                signature,
+                digest1,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA512()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA512()
+            )
+            # print("your signature is valid")
+            text = "your signature is valid"
+            messagebox.showinfo("Valid", text)
 
-    except:
+        except:
 
-        print("your signature is invalid")
+            # print("your signature is invalid")
+            text = "your signature is invalid"
+            messagebox.showwarning("Invalid", text)
 
+    _ver_index.set("")
 
-#########################################data in table###################################################
+############################end verify func############################
 
+L = Label(T2,text="VERIFY", font=FONT30)
+L.pack(pady=20)
 
-#insert data to table
+L = Label(T2,text="Please enter the index to verify the signature\n for example \"Certificate0\" = index 0 (enter 0)", font=FONT30)
+L.pack(pady=20)
 
+_ver_index = StringVar()
+E3 = ttk.Entry(T2,textvariable=_ver_index,font=FONT20)
+E3.pack(pady=20)
+E3.focus()
+
+B2 = ttk.Button(T2,text="verify", command=Verification)
+B2.pack(pady=20, ipadx=15, ipady=10)
+B2.bind("<Return>", Verification)
 
 
 
